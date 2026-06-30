@@ -101,7 +101,8 @@ def fetch_live_inputs_alpaca(
     if hist.empty or len(hist) < 30:
         raise ValueError(f"Insufficient Alpaca historical data returned for {ticker}.")
 
-    prev_row = hist.iloc[-1]
+    prev_idx = -2 if len(hist) >= 2 else -1
+    prev_row = hist.iloc[prev_idx]
     atr_14 = compute_atr(hist, period=14)
     sma_200 = float(hist["Close"].tail(200).mean()) if len(hist) >= 200 else float(hist["Close"].mean())
 

@@ -27,8 +27,13 @@ cp .env.example .env
 ## Run the dashboard
 
 ```bash
+cd premarket-options
+cp .env.example .env    # add ALPACA_API_KEY + ALPACA_SECRET_KEY
+pip install -r requirements.txt
 streamlit run dashboard.py
 ```
+
+The dashboard supports **0DTE mode** (default), conviction-scored CSP tiers (A/B/C grades), gap detection, prior-session anchors, max pain, and GEX.
 
 ## CLI (probability module only)
 

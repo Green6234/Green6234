@@ -16,6 +16,7 @@ def build_premarket_analysis(
     expiration: Optional[date] = None,
     strike_window: int = 25,
     strike_range: int = 15,
+    dte: int = 0,
     use_vix_conditional: bool = True,
 ) -> dict:
     """
@@ -45,6 +46,7 @@ def build_premarket_analysis(
     report = generate_premarket_report(
         inputs,
         strike_range=strike_range,
+        dte=dte,
         use_vix_conditional=use_vix_conditional,
     )
 
