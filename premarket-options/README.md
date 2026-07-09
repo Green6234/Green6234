@@ -1,6 +1,8 @@
-# Pre-Market Options Analysis
+# 1DTE Put OTM Probability
 
-SPY strike probability, max pain, GEX, and cash-secured put recommendations — with a Streamlit dashboard.
+One question: **what's the historical probability SPY's next close finishes above your put strike?**
+
+Filtered by VIX band (similar vol days). No Alpaca. No max pain. No GEX.
 
 ## Install
 
@@ -9,66 +11,35 @@ cd premarket-options
 pip install -r requirements.txt
 ```
 
-## Alpaca setup
-
-Alpaca works for **SPY historical bars, live quotes, and options chain data** (greeks, quotes, open interest). VIX is still pulled from yfinance because Alpaca does not carry the VIX index.
-
-1. Copy `.env.example` to `.env`
-2. Add your Alpaca **API Key ID** and **Secret Key** from the [Alpaca dashboard](https://app.alpaca.markets/paper/dashboard/overview)
-3. Paper endpoint (default): `https://paper-api.alpaca.markets/v2`
+## Run (terminal)
 
 ```bash
-cp .env.example .env
-# Edit .env — you need BOTH keys, not just the Key ID
+python run.py
 ```
 
-**Never commit `.env` or paste keys into chat.** If a key was exposed, regenerate it in Alpaca.
-
-## Run the dashboard
+## Run (dashboard)
 
 ```bash
-cd premarket-options
-cp .env.example .env    # add ALPACA_API_KEY + ALPACA_SECRET_KEY
-pip install -r requirements.txt
 streamlit run dashboard.py
 ```
 
-The dashboard supports **0DTE mode** (default), conviction-scored CSP tiers (A/B/C grades), gap detection, prior-session anchors, max pain, and GEX.
+## How to read it
 
-## CLI (probability module only)
+| Column | Meaning |
+|--------|---------|
+| **P(OTM)** | % of similar-VIX days where next close > strike |
+| **Dist** | Dollars below today's open |
+| **✓** | Meets your minimum P(OTM) floor |
 
-```bash
-python spy_range_probability.py          # yfinance fallback
-python -c "from pipeline import build_premarket_analysis; ..."  # full pipeline
-```
+**Trade when:** Regime = OK, pick strikes with ✓.
 
-## Architecture
+**1DTE** = you sell today, expiration is **next session close**.
 
-| Module | Role |
-|--------|------|
-| `spy_range_probability.py` | Reach-probability heatmap, IV/ATR bands, regime filter, CSP tiers, technical levels |
-| `alpaca_data.py` | Alpaca SPY bars/quotes + options chain (OI + greeks) |
-| `max_pain.py` | Max pain strike from chain OI |
-| `gex.py` | Gamma exposure by strike + zero-gamma level |
-| `pipeline.py` | Wires all modules into one report |
-| `dashboard.py` | Streamlit UI |
+## Mac quick start
 
-## Data flow
+Double-click `START.command` (right-click → Open if blocked).
 
-```
-Alpaca (SPY bars, quotes, options chain)
-    + yfinance (VIX only)
-        → pipeline.build_premarket_analysis()
-            → max_pain + gex + generate_premarket_report()
-                → Streamlit dashboard
-```
+## Settings (dashboard sidebar)
 
-## Options data notes
-
-- **Open interest** comes from Alpaca's contract endpoint (1-day OCC lag — industry standard)
-- **Greeks / IV / quotes** come from the option chain snapshot endpoint
-- Requires an Alpaca account with **options market data** access for full chain snapshots
-
-## yfinance fallback
-
-Set data source to `yfinance` in the dashboard sidebar to run probability + technical analysis without Alpaca options data (no max pain / GEX).
+- **Min P(OTM) %** — default 85% for small account 1DTE
+- **VIX band** — how tight to match today's VIX (default ±4)
